@@ -1,5 +1,5 @@
 {
-  "name": "unisonht-roku",
+  "name": "@unisonht/roku",
   "version": "0.0.1",
   "description": "UnisonHT Plugin for Roku",
   "main": "dist/index.js",
