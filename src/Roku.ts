@@ -6,6 +6,8 @@ import {
   RouteHandlerRequest,
   RouteHandlerResponse,
   StandardKey,
+  SupportedKey,
+  SupportedKeys,
   UnisonHT,
   UnisonHTDevice,
 } from '@unisonht/unisonht';
@@ -85,7 +87,7 @@ interface ClientAndClientInfo {
   clientInfo: Record<string, string>;
 }
 
-interface KeyMapItem {
+interface KeyMapItem extends SupportedKey {
   rokuKey: KeyType;
 }
 
@@ -188,6 +190,10 @@ export class Roku implements UnisonHTDevice {
   constructor(deviceName: string, options: RokuOptions) {
     this.deviceName = deviceName;
     this.client = new Client(options.url);
+  }
+
+  public getSupportedKeys(): SupportedKeys {
+    return KEY_MAP;
   }
 
   public getDeviceName(): string {
