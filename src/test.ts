@@ -1,4 +1,4 @@
-import {UnisonHT} from "unisonht";
+import {UnisonHT} from "@unisonht/unisonht";
 import {Roku} from ".";
 
 const port = 3000;

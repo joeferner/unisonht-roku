@@ -8,7 +8,7 @@ import {
     StandardKey,
     UnisonHT,
     UnisonHTDevice
-} from "unisonht";
+} from "@unisonht/unisonht";
 import Client, {keys} from 'roku-client';
 import {KeyType} from "roku-client/dist/keyCommand";
 import {App} from "roku-client/dist/client";
