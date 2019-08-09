@@ -1,0 +1,40 @@
+{
+  "name": "unisonht-roku",
+  "version": "0.0.1",
+  "description": "UnisonHT Plugin for Roku",
+  "main": "dist/index.js",
+  "types": "src/index.ts",
+  "scripts": {
+    "test:watch": "nodemon ./dist/test.js",
+    "build": "tsc",
+    "build:watch": "tsc --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joeferner/unisonht-roku.git"
+  },
+  "keywords": [
+    "unisonht",
+    "roku"
+  ],
+  "author": "Joe Ferner <joe@fernsroth.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/joeferner/unisonht-roku/issues"
+  },
+  "homepage": "https://github.com/joeferner/unisonht-roku#readme",
+  "dependencies": {
+    "axios": "^0.19.0",
+    "debug": "^4.1.1",
+    "roku-client": "^3.1.6"
+  },
+  "peerDependencies": {
+    "unisonht": "0.0.x"
+  },
+  "devDependencies": {
+    "@types/debug": "^4.1.5",
+    "@types/node": "^12.7.1",
+    "nodemon": "^1.19.1",
+    "typescript": "^3.5.3"
+  }
+}
