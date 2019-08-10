@@ -95,105 +95,69 @@ interface KeyMap {
   [key: string]: KeyMapItem;
 }
 
-const KEY_MAP: KeyMap = {
-  [StandardKey.HOME]: {
-    rokuKey: keys.HOME,
-  },
-  [StandardKey.REVERSE]: {
-    rokuKey: keys.REVERSE,
-  },
-  [StandardKey.FORWARD]: {
-    rokuKey: keys.FORWARD,
-  },
-  [StandardKey.PLAY]: {
-    rokuKey: keys.PLAY,
-  },
-  [StandardKey.SELECT]: {
-    rokuKey: keys.SELECT,
-  },
-  [StandardKey.LEFT]: {
-    rokuKey: keys.LEFT,
-  },
-  [StandardKey.RIGHT]: {
-    rokuKey: keys.RIGHT,
-  },
-  [StandardKey.UP]: {
-    rokuKey: keys.UP,
-  },
-  [StandardKey.DOWN]: {
-    rokuKey: keys.DOWN,
-  },
-  [StandardKey.BACK]: {
-    rokuKey: keys.BACK,
-  },
-  [StandardKey.INFO]: {
-    rokuKey: keys.INFO,
-  },
-  [StandardKey.ENTER]: {
-    rokuKey: keys.ENTER,
-  },
-  [StandardKey.VOLUME_UP]: {
-    rokuKey: keys.VOLUME_UP,
-  },
-  [StandardKey.VOLUME_DOWN]: {
-    rokuKey: keys.VOLUME_DOWN,
-  },
-  [StandardKey.MUTE]: {
-    rokuKey: keys.VOLUME_MUTE,
-  },
-  [StandardKey.CHANNEL_UP]: {
-    rokuKey: keys.CHANNEL_UP,
-  },
-  [StandardKey.CHANNEL_DOWN]: {
-    rokuKey: keys.CHANNEL_DOWN,
-  },
-  [StandardKey.POWER_TOGGLE]: {
-    rokuKey: keys.POWER,
-  },
-  [StandardKey.INSTANT_REPLAY]: {
-    rokuKey: keys.INSTANT_REPLAY,
-  },
-  [StandardKey.BACKSPACE]: {
-    rokuKey: keys.BACKSPACE,
-  },
-  [StandardKey.SEARCH]: {
-    rokuKey: keys.SEARCH,
-  },
-  [StandardKey.FIND_REMOTE]: {
-    rokuKey: keys.FIND_REMOTE,
-  },
-  [StandardKey.INPUT_TUNER]: {
-    rokuKey: keys.INPUT_TUNER,
-  },
-  [StandardKey.INPUT_HDMI1]: {
-    rokuKey: keys.INPUT_HDMI1,
-  },
-  [StandardKey.INPUT_HDMI2]: {
-    rokuKey: keys.INPUT_HDMI2,
-  },
-  [StandardKey.INPUT_HDMI3]: {
-    rokuKey: keys.INPUT_HDMI3,
-  },
-  [StandardKey.INPUT_HDMI4]: {
-    rokuKey: keys.INPUT_HDMI4,
-  },
-  [StandardKey.INPUT_AV1]: {
-    rokuKey: keys.INPUT_AV1,
-  },
-};
-
 export class Roku implements UnisonHTDevice {
   private readonly deviceName: string;
   private readonly client: Client;
+  private readonly keyMap: KeyMap;
   private apps: App[] | undefined;
 
   constructor(deviceName: string, options: RokuOptions) {
     this.deviceName = deviceName;
     this.client = new Client(options.url);
+    this.keyMap = {
+      [StandardKey.HOME]: this.createKey('Home', keys.HOME),
+      [StandardKey.REVERSE]: this.createKey('Reverse', keys.REVERSE),
+      [StandardKey.FORWARD]: this.createKey('Forward', keys.FORWARD),
+      [StandardKey.PLAY]: this.createKey('Play', keys.PLAY),
+      [StandardKey.SELECT]: this.createKey('Select', keys.SELECT),
+      [StandardKey.LEFT]: this.createKey('Left', keys.LEFT),
+      [StandardKey.RIGHT]: this.createKey('Right', keys.RIGHT),
+      [StandardKey.UP]: this.createKey('Up', keys.UP),
+      [StandardKey.DOWN]: this.createKey('Down', keys.DOWN),
+      [StandardKey.BACK]: this.createKey('Back', keys.BACK),
+      [StandardKey.INFO]: this.createKey('Info', keys.INFO),
+      [StandardKey.ENTER]: this.createKey('Enter', keys.ENTER),
+      [StandardKey.VOLUME_UP]: this.createKey('Volume Up', keys.VOLUME_UP),
+      [StandardKey.VOLUME_DOWN]: this.createKey('Volume Down', keys.VOLUME_DOWN),
+      [StandardKey.MUTE]: this.createKey('Mute', keys.VOLUME_MUTE),
+      [StandardKey.CHANNEL_UP]: this.createKey('Channel Up', keys.CHANNEL_UP),
+      [StandardKey.CHANNEL_DOWN]: this.createKey('Channel Down', keys.CHANNEL_DOWN),
+      [StandardKey.POWER_TOGGLE]: this.createKey('Power Toggle', keys.POWER),
+      [StandardKey.INSTANT_REPLAY]: this.createKey('Instant Replay', keys.INSTANT_REPLAY),
+      [StandardKey.BACKSPACE]: this.createKey('Backspace', keys.BACKSPACE),
+      [StandardKey.SEARCH]: this.createKey('Search', keys.SEARCH),
+      [StandardKey.FIND_REMOTE]: this.createKey('Find Remote', keys.FIND_REMOTE),
+      [StandardKey.INPUT_TUNER]: this.createKey('Input: Tuner', keys.INPUT_TUNER),
+      [StandardKey.INPUT_HDMI1]: this.createKey('Input: HDMI1', keys.INPUT_HDMI1),
+      [StandardKey.INPUT_HDMI2]: this.createKey('Input: HDMI2', keys.INPUT_HDMI2),
+      [StandardKey.INPUT_HDMI3]: this.createKey('Input: HDMI3', keys.INPUT_HDMI3),
+      [StandardKey.INPUT_HDMI4]: this.createKey('Input: HDMI4', keys.INPUT_HDMI4),
+      [StandardKey.INPUT_AV1]: this.createKey('Input: AV1', keys.INPUT_AV1),
+    };
+  }
+
+  private createKey(name: string, rokuKey: any): KeyMapItem {
+    return {
+      name,
+      rokuKey,
+      handleKeyPress: async (
+        key: string,
+        request: RouteHandlerRequest,
+        response: RouteHandlerResponse,
+        next: NextFunction,
+      ): Promise<void> => {
+        const k = this.keyMap[key];
+        if (!k) {
+          return next(new ButtonNotFoundError(key));
+        }
+        await this.client.keypress(k.rokuKey);
+        response.send();
+      },
+    };
   }
 
   public getSupportedKeys(): SupportedKeys {
-    return KEY_MAP;
+    return this.keyMap;
   }
 
   public getDeviceName(): string {
@@ -257,20 +221,6 @@ export class Roku implements UnisonHTDevice {
       activeApp: active,
       apps,
     };
-  }
-
-  public async handleKeyPress(
-    key: string,
-    request: RouteHandlerRequest,
-    response: RouteHandlerResponse,
-    next: NextFunction,
-  ): Promise<void> {
-    const k = KEY_MAP[key];
-    if (!k) {
-      return next(new ButtonNotFoundError(key));
-    }
-    await this.client.keypress(k.rokuKey);
-    response.send();
   }
 
   public static async discoverAll(timeout?: number): Promise<RokuInfo[]> {
