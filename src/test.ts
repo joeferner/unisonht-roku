@@ -1,8 +1,9 @@
-import { UnisonHT } from '@unisonht/unisonht';
+import { UnisonHT, WebApi } from '@unisonht/unisonht';
 import { Roku } from '.';
 
 const port = 3000;
 const unisonht = new UnisonHT({});
+unisonht.use(new WebApi({ port }));
 
 unisonht.use(
   new Roku('roku', {
@@ -18,7 +19,7 @@ async function discover() {
 }
 
 async function start() {
-  await unisonht.listen(port);
+  await unisonht.start();
   console.log(`Listening http://localhost:${port}`);
 }
 

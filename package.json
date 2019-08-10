@@ -30,9 +30,7 @@
   "dependencies": {
     "axios": "^0.19.0",
     "debug": "^4.1.1",
-    "roku-client": "^3.1.6"
-  },
-  "peerDependencies": {
+    "roku-client": "^3.1.6",
     "@unisonht/unisonht": "0.0.x"
   },
   "devDependencies": {
