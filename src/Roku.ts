@@ -5,9 +5,9 @@ import {
   NotFoundError,
   RouteHandlerRequest,
   RouteHandlerResponse,
-  StandardKey,
-  SupportedKey,
-  SupportedKeys,
+  StandardButton,
+  SupportedButton,
+  SupportedButtons,
   UnisonHT,
   UnisonHTDevice,
 } from '@unisonht/unisonht';
@@ -87,66 +87,66 @@ interface ClientAndClientInfo {
   clientInfo: Record<string, string>;
 }
 
-interface KeyMapItem extends SupportedKey {
+interface ButtonMapItem extends SupportedButton {
   rokuKey: KeyType;
 }
 
-interface KeyMap {
-  [key: string]: KeyMapItem;
+interface ButtonMap {
+  [button: string]: ButtonMapItem;
 }
 
 export class Roku implements UnisonHTDevice {
   private readonly deviceName: string;
   private readonly client: Client;
-  private readonly keyMap: KeyMap;
+  private readonly buttonMap: ButtonMap;
   private apps: App[] | undefined;
 
   constructor(deviceName: string, options: RokuOptions) {
     this.deviceName = deviceName;
     this.client = new Client(options.url);
-    this.keyMap = {
-      [StandardKey.HOME]: this.createKey('Home', keys.HOME),
-      [StandardKey.REVERSE]: this.createKey('Reverse', keys.REVERSE),
-      [StandardKey.FORWARD]: this.createKey('Forward', keys.FORWARD),
-      [StandardKey.PLAY]: this.createKey('Play', keys.PLAY),
-      [StandardKey.SELECT]: this.createKey('Select', keys.SELECT),
-      [StandardKey.LEFT]: this.createKey('Left', keys.LEFT),
-      [StandardKey.RIGHT]: this.createKey('Right', keys.RIGHT),
-      [StandardKey.UP]: this.createKey('Up', keys.UP),
-      [StandardKey.DOWN]: this.createKey('Down', keys.DOWN),
-      [StandardKey.BACK]: this.createKey('Back', keys.BACK),
-      [StandardKey.INFO]: this.createKey('Info', keys.INFO),
-      [StandardKey.ENTER]: this.createKey('Enter', keys.ENTER),
-      [StandardKey.VOLUME_UP]: this.createKey('Volume Up', keys.VOLUME_UP),
-      [StandardKey.VOLUME_DOWN]: this.createKey('Volume Down', keys.VOLUME_DOWN),
-      [StandardKey.MUTE]: this.createKey('Mute', keys.VOLUME_MUTE),
-      [StandardKey.CHANNEL_UP]: this.createKey('Channel Up', keys.CHANNEL_UP),
-      [StandardKey.CHANNEL_DOWN]: this.createKey('Channel Down', keys.CHANNEL_DOWN),
-      [StandardKey.POWER_TOGGLE]: this.createKey('Power Toggle', keys.POWER),
-      [StandardKey.INSTANT_REPLAY]: this.createKey('Instant Replay', keys.INSTANT_REPLAY),
-      [StandardKey.BACKSPACE]: this.createKey('Backspace', keys.BACKSPACE),
-      [StandardKey.SEARCH]: this.createKey('Search', keys.SEARCH),
-      [StandardKey.FIND_REMOTE]: this.createKey('Find Remote', keys.FIND_REMOTE),
-      [StandardKey.INPUT_TUNER]: this.createKey('Input: Tuner', keys.INPUT_TUNER),
-      [StandardKey.INPUT_HDMI1]: this.createKey('Input: HDMI1', keys.INPUT_HDMI1),
-      [StandardKey.INPUT_HDMI2]: this.createKey('Input: HDMI2', keys.INPUT_HDMI2),
-      [StandardKey.INPUT_HDMI3]: this.createKey('Input: HDMI3', keys.INPUT_HDMI3),
-      [StandardKey.INPUT_HDMI4]: this.createKey('Input: HDMI4', keys.INPUT_HDMI4),
-      [StandardKey.INPUT_AV1]: this.createKey('Input: AV1', keys.INPUT_AV1),
+    this.buttonMap = {
+      [StandardButton.HOME]: this.createButton('Home', keys.HOME),
+      [StandardButton.REVERSE]: this.createButton('Reverse', keys.REVERSE),
+      [StandardButton.FORWARD]: this.createButton('Forward', keys.FORWARD),
+      [StandardButton.PLAY]: this.createButton('Play', keys.PLAY),
+      [StandardButton.SELECT]: this.createButton('Select', keys.SELECT),
+      [StandardButton.LEFT]: this.createButton('Left', keys.LEFT),
+      [StandardButton.RIGHT]: this.createButton('Right', keys.RIGHT),
+      [StandardButton.UP]: this.createButton('Up', keys.UP),
+      [StandardButton.DOWN]: this.createButton('Down', keys.DOWN),
+      [StandardButton.BACK]: this.createButton('Back', keys.BACK),
+      [StandardButton.INFO]: this.createButton('Info', keys.INFO),
+      [StandardButton.ENTER]: this.createButton('Enter', keys.ENTER),
+      [StandardButton.VOLUME_UP]: this.createButton('Volume Up', keys.VOLUME_UP),
+      [StandardButton.VOLUME_DOWN]: this.createButton('Volume Down', keys.VOLUME_DOWN),
+      [StandardButton.MUTE]: this.createButton('Mute', keys.VOLUME_MUTE),
+      [StandardButton.CHANNEL_UP]: this.createButton('Channel Up', keys.CHANNEL_UP),
+      [StandardButton.CHANNEL_DOWN]: this.createButton('Channel Down', keys.CHANNEL_DOWN),
+      [StandardButton.POWER_TOGGLE]: this.createButton('Power Toggle', keys.POWER),
+      [StandardButton.INSTANT_REPLAY]: this.createButton('Instant Replay', keys.INSTANT_REPLAY),
+      [StandardButton.BACKSPACE]: this.createButton('Backspace', keys.BACKSPACE),
+      [StandardButton.SEARCH]: this.createButton('Search', keys.SEARCH),
+      [StandardButton.FIND_REMOTE]: this.createButton('Find Remote', keys.FIND_REMOTE),
+      [StandardButton.INPUT_TUNER]: this.createButton('Input: Tuner', keys.INPUT_TUNER),
+      [StandardButton.INPUT_HDMI1]: this.createButton('Input: HDMI1', keys.INPUT_HDMI1),
+      [StandardButton.INPUT_HDMI2]: this.createButton('Input: HDMI2', keys.INPUT_HDMI2),
+      [StandardButton.INPUT_HDMI3]: this.createButton('Input: HDMI3', keys.INPUT_HDMI3),
+      [StandardButton.INPUT_HDMI4]: this.createButton('Input: HDMI4', keys.INPUT_HDMI4),
+      [StandardButton.INPUT_AV1]: this.createButton('Input: AV1', keys.INPUT_AV1),
     };
   }
 
-  private createKey(name: string, rokuKey: any): KeyMapItem {
+  private createButton(name: string, rokuKey: any): ButtonMapItem {
     return {
       name,
       rokuKey,
-      handleKeyPress: async (
+      handleButtonPress: async (
         key: string,
         request: RouteHandlerRequest,
         response: RouteHandlerResponse,
         next: NextFunction,
       ): Promise<void> => {
-        const k = this.keyMap[key];
+        const k = this.buttonMap[key];
         if (!k) {
           return next(new ButtonNotFoundError(key));
         }
@@ -156,8 +156,8 @@ export class Roku implements UnisonHTDevice {
     };
   }
 
-  public getSupportedKeys(): SupportedKeys {
-    return this.keyMap;
+  public getSupportedButtons(): SupportedButtons {
+    return this.buttonMap;
   }
 
   public getDeviceName(): string {
