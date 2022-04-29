@@ -1,6 +1,6 @@
 {
   "name": "@unisonht/roku",
-  "version": "0.0.2",
+  "version": "1.0.0",
   "description": "UnisonHT Plugin for Roku",
   "main": "dist/index.js",
   "types": "src/index.ts",
@@ -12,7 +12,7 @@
     "lint": "eslint --fix --ext .ts .",
     "lint-staged": "lint-staged",
     "pre-commit": "npm run format && npm run lint-staged && npm run build",
-    "test:watch": "nodemon ./dist/test.js"
+    "test:watch": "DEBUG=unisonht:* nodemon ../unisonht/dist/bin/server.js -c sample.config.json"
   },
   "repository": {
     "type": "git",
@@ -28,25 +28,23 @@
     "url": "https://github.com/joeferner/unisonht-roku/issues"
   },
   "homepage": "https://github.com/joeferner/unisonht-roku#readme",
+  "peerDependencies": {
+    "@unisonht/unisonht": "../unisonht/"
+  },
   "dependencies": {
-    "axios": "0.20.x",
-    "debug": "4.2.x",
-    "roku-client": "4.2.x",
-    "@unisonht/unisonht": "0.0.x"
+    "axios": "0.27.x",
+    "roku-client": "5.2.x"
   },
   "devDependencies": {
-    "@types/debug": "4.x",
-    "@types/node": "14.x",
-    "@types/yargs": "15.x",
-    "@typescript-eslint/eslint-plugin": "4.x",
-    "@typescript-eslint/parser": "4.x",
-    "eslint": "7.x",
-    "husky": "4.x",
-    "lint-staged": "10.x",
+    "@types/node": "17.x",
+    "@typescript-eslint/eslint-plugin": "^5.21.0",
+    "eslint": "8.x",
+    "husky": "7.x",
+    "lint-staged": "12.x",
+    "nodemon": "2.x",
     "prettier": "2.x",
-    "ts-node": "9.x",
-    "typescript": "4.x",
-    "nodemon": "2.x"
+    "ts-node": "10.x",
+    "typescript": "4.x"
   },
   "husky": {
     "hooks": {

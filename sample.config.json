@@ -1,0 +1,51 @@
+{
+    "version": 1,
+    "defaultModeId": "1d4a0294-39e4-4631-a615-1c7a14e14ae0",
+    "plugins": [
+        {
+            "id": "2cb14523-90cc-4e6b-ba2b-b286b0eb33e9",
+            "name": "Web Remote",
+            "pluginFactoryId": "unisonht:web-remote",
+            "data": {
+                "buttons": [
+                    "UP",
+                    "DOWN",
+                    "LEFT",
+                    "RIGHT",
+                    "OK",
+                    "BACK"
+                ]
+            }
+        }
+    ],
+    "modes": [
+        {
+            "id": "1d4a0294-39e4-4631-a615-1c7a14e14ae0",
+            "name": "ON",
+            "buttons": [
+                {
+                    "name": "*",
+                    "actions": [
+                        {
+                            "type": "forwardToDevice",
+                            "deviceId": "f0dfaa58-cf1c-495e-938d-bec5744dc51a"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "devices": [
+        {
+            "id": "f0dfaa58-cf1c-495e-938d-bec5744dc51a",
+            "deviceFactoryId": "../unisonht-roku:RokuDeviceFactory",
+            "name": "Roku",
+            "activeModeIds": [
+                "1d4a0294-39e4-4631-a615-1c7a14e14ae0"
+            ],
+            "data": {
+                "url": "http://localhost"
+            }
+        }
+    ]
+}

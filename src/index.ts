@@ -1,1 +1,1 @@
-export * from './Roku';
+export * from './RokuDevice';
