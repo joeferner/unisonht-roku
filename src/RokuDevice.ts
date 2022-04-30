@@ -1,13 +1,24 @@
-import Client, { Keys } from 'roku-client';
 import {
     Device,
     DeviceConfig,
     DeviceFactory,
+    OpenApi,
     PowerState,
     StandardButtons,
     StandardInputs,
     UnisonHTServer,
 } from '@unisonht/unisonht';
+import { Request, Response } from 'express-serve-static-core';
+import Client, {
+    Keys,
+    RokuApp,
+    RokuAppId,
+    RokuClient,
+    RokuDeviceInfo,
+    RokuMediaInfo,
+    RokuSearchParams,
+} from 'roku-client';
+import { updateSwaggerJson } from './updateSwaggerJson';
 
 export class RokuDeviceFactory implements DeviceFactory<RokuDeviceConfig> {
     async createDevice(
@@ -24,6 +35,67 @@ export class RokuDevice extends Device<RokuDeviceConfig> {
     constructor(config: DeviceConfig<RokuDeviceConfig>, server: UnisonHTServer) {
         super(config, server);
         this.client = new Client(config.data.url);
+
+        this.router.get(
+            `${this.apiUrlPrefix}/discover-all`,
+            async (req: Request<unknown, Client[], unknown, DiscoverAllQuery>, resp: Response<Client[]>) => {
+                resp.json(await this.discoverAll(req.query.timeout));
+            },
+        );
+
+        this.router.get(`${this.apiUrlPrefix}/info`, async (_req: Request, resp: Response<RokuDeviceInfo>) => {
+            resp.json(await this.info());
+        });
+
+        this.router.get(`${this.apiUrlPrefix}/apps`, async (_req: Request, resp: Response<RokuApp[]>) => {
+            resp.json(await this.apps());
+        });
+
+        this.router.get(`${this.apiUrlPrefix}/active`, async (_req: Request, resp: Response<RokuApp | null>) => {
+            resp.json(await this.active());
+        });
+
+        this.router.get(
+            `${this.apiUrlPrefix}/icon-info`,
+            async (req: Request<unknown, IconInfoResponse, unknown, IconQuery>, resp: Response<IconInfoResponse>) => {
+                const icon = await this.icon(req.query.appId);
+                resp.json({
+                    extension: icon.extension,
+                    type: icon.type,
+                });
+            },
+        );
+
+        this.router.get(
+            `${this.apiUrlPrefix}/icon`,
+            async (req: Request<unknown, Buffer, unknown, IconQuery>, resp: Response<Buffer>) => {
+                const icon = await this.icon(req.query.appId);
+                resp.writeHead(200, {
+                    'Content-Type': icon.type,
+                    'Content-Length': icon.data?.byteLength,
+                });
+                resp.end(icon.data);
+            },
+        );
+
+        this.router.get(
+            `${this.apiUrlPrefix}/search`,
+            async (req: Request<unknown, unknown, unknown, RokuSearchParams>, resp: Response<unknown>) => {
+                await this.search(req.query);
+                resp.json({});
+            },
+        );
+
+        this.router.get(`${this.apiUrlPrefix}/media-player`, async (_req: Request, resp: Response<RokuMediaInfo>) => {
+            resp.json(await this.mediaPlayer());
+        });
+
+        this.router.post(
+            `${this.apiUrlPrefix}/launch`,
+            async (req: Request<unknown, unknown, unknown, LaunchQuery>, resp: Response) => {
+                resp.json(await this.launch(req.query.appId));
+            },
+        );
     }
 
     override async handleButtonPress(button: string): Promise<void> {
@@ -59,10 +131,75 @@ export class RokuDevice extends Device<RokuDeviceConfig> {
     override get buttons(): string[] {
         return Object.keys(BUTTONS_TO_KEYS);
     }
+
+    override updateSwaggerJson(swaggerJson: OpenApi): void {
+        super.updateSwaggerJson(swaggerJson);
+        updateSwaggerJson(swaggerJson, this.apiUrlPrefix, this.swaggerTags);
+    }
+
+    discoverAll(timeout?: number): Promise<Client[]> {
+        return RokuClient.discoverAll(timeout);
+    }
+
+    info(): Promise<RokuDeviceInfo> {
+        return this.client.info();
+    }
+
+    apps(): Promise<RokuApp[]> {
+        return this.client.apps();
+    }
+
+    active(): Promise<RokuApp | null> {
+        return this.client.active();
+    }
+
+    async icon(appId: RokuAppId): Promise<IconData> {
+        const icon = await this.client.icon(appId);
+        return {
+            extension: icon.extension,
+            type: icon.type,
+            data: Buffer.from(await icon.response.arrayBuffer()),
+        };
+    }
+
+    search(query: RokuSearchParams): Promise<void> {
+        return this.client.search(query);
+    }
+
+    mediaPlayer(): Promise<RokuMediaInfo> {
+        return this.client.mediaPlayer();
+    }
+
+    launch(appId: RokuAppId): Promise<void> {
+        return this.client.launch(appId);
+    }
 }
 
 export interface RokuDeviceConfig {
     url: string;
+}
+
+export interface DiscoverAllQuery {
+    timeout?: number;
+}
+
+export interface LaunchQuery {
+    appId: RokuAppId;
+}
+
+export interface IconQuery {
+    appId: RokuAppId;
+}
+
+export interface IconData {
+    type?: string;
+    extension?: string;
+    data?: Buffer;
+}
+
+export interface IconInfoResponse {
+    type?: string;
+    extension?: string;
 }
 
 export const INPUTS_TO_KEYS: { [input: string]: { command: string; name: string } } = {
