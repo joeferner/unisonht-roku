@@ -32,7 +32,6 @@
     "@unisonht/unisonht": "../unisonht/"
   },
   "dependencies": {
-    "axios": "0.27.x",
     "roku-client": "5.2.x"
   },
   "devDependencies": {
