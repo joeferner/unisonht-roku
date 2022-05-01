@@ -25,15 +25,15 @@ export class RokuDeviceFactory implements DeviceFactory<RokuDeviceConfig> {
         server: UnisonHTServer,
         config: DeviceConfig<RokuDeviceConfig>,
     ): Promise<Device<RokuDeviceConfig>> {
-        return new RokuDevice(config, server);
+        return new RokuDevice(server, config);
     }
 }
 
 export class RokuDevice extends Device<RokuDeviceConfig> {
     private readonly client: Client;
 
-    constructor(config: DeviceConfig<RokuDeviceConfig>, server: UnisonHTServer) {
-        super(config, server);
+    constructor(server: UnisonHTServer, config: DeviceConfig<RokuDeviceConfig>) {
+        super(server, config);
         this.client = new Client(config.data.url);
 
         this.router.get(
