@@ -18,7 +18,7 @@ import Client, {
     RokuMediaInfo,
     RokuSearchParams,
 } from 'roku-client';
-import { updateSwaggerJson } from './updateSwaggerJson';
+import { updateOpenApi } from './updateOpenApi';
 
 export class RokuDeviceFactory implements DeviceFactory<RokuDeviceConfig> {
     async createDevice(
@@ -38,8 +38,11 @@ export class RokuDevice extends Device<RokuDeviceConfig> {
 
         this.router.get(
             `${this.apiUrlPrefix}/discover-all`,
-            async (req: Request<unknown, Client[], unknown, DiscoverAllQuery>, resp: Response<Client[]>) => {
-                resp.json(await this.discoverAll(req.query.timeout));
+            async (
+                req: Request<unknown, DiscoverAllResponse[], unknown, DiscoverAllQuery>,
+                resp: Response<DiscoverAllResponse[]>,
+            ) => {
+                resp.json(await this.discoverAll(req.query.timeoutMs));
             },
         );
 
@@ -132,13 +135,23 @@ export class RokuDevice extends Device<RokuDeviceConfig> {
         return Object.keys(BUTTONS_TO_KEYS);
     }
 
-    override updateSwaggerJson(swaggerJson: OpenApi): void {
-        super.updateSwaggerJson(swaggerJson);
-        updateSwaggerJson(swaggerJson, this.apiUrlPrefix, this.swaggerTags);
+    override updateOpenApi(openApi: OpenApi): void {
+        super.updateOpenApi(openApi);
+        updateOpenApi(openApi, this.apiUrlPrefix, this.openApiTags);
     }
 
-    discoverAll(timeout?: number): Promise<Client[]> {
-        return RokuClient.discoverAll(timeout);
+    async discoverAll(timeoutMs?: number): Promise<DiscoverAllResponse[]> {
+        const discoverAllResults = await RokuClient.discoverAll(timeoutMs);
+        return Promise.all(
+            discoverAllResults.map(async (discoverAllResult) => {
+                const client = new Client(discoverAllResult.ip);
+                const info = await client.info();
+                return {
+                    url: discoverAllResult.ip,
+                    ...info,
+                };
+            }),
+        );
     }
 
     info(): Promise<RokuDeviceInfo> {
@@ -175,12 +188,16 @@ export class RokuDevice extends Device<RokuDeviceConfig> {
     }
 }
 
+export interface DiscoverAllResponse extends RokuDeviceInfo {
+    url: string;
+}
+
 export interface RokuDeviceConfig {
     url: string;
 }
 
 export interface DiscoverAllQuery {
-    timeout?: number;
+    timeoutMs?: number;
 }
 
 export interface LaunchQuery {
