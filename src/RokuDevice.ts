@@ -1,12 +1,10 @@
 import {
     Device,
     DeviceConfig,
-    DeviceFactory,
-    OpenApi,
-    PowerState,
+    DeviceFactory, Get, PowerState,
     StandardButtons,
     StandardInputs,
-    UnisonHTServer,
+    UnisonHTServer
 } from '@unisonht/unisonht';
 import { Request, Response } from 'express-serve-static-core';
 import Client, {
@@ -16,9 +14,9 @@ import Client, {
     RokuClient,
     RokuDeviceInfo,
     RokuMediaInfo,
-    RokuSearchParams,
+    RokuSearchParams
 } from 'roku-client';
-import { updateOpenApi } from './updateOpenApi';
+import { getType, Type } from 'tst-reflect';
 
 export class RokuDeviceFactory implements DeviceFactory<RokuDeviceConfig> {
     async createDevice(
@@ -135,11 +133,17 @@ export class RokuDevice extends Device<RokuDeviceConfig> {
         return Object.keys(BUTTONS_TO_KEYS);
     }
 
-    override updateOpenApi(openApi: OpenApi): void {
-        super.updateOpenApi(openApi);
-        updateOpenApi(openApi, this.apiUrlPrefix, this.openApiTags);
+    override getOpenApiType(): Type | undefined {
+        return getType<RokuDevice>();
     }
 
+    // TODO remove
+    // override updateOpenApi(openApi: OpenApi): void {
+    //     super.updateOpenApi(openApi);
+    //     updateOpenApi(openApi, this.apiUrlPrefix, this.openApiTags);
+    // }
+
+    @Get('`${this.apiUrlPrefix}/discover-all`')
     async discoverAll(timeoutMs?: number): Promise<DiscoverAllResponse[]> {
         const discoverAllResults = await RokuClient.discoverAll(timeoutMs);
         return Promise.all(
@@ -154,10 +158,12 @@ export class RokuDevice extends Device<RokuDeviceConfig> {
         );
     }
 
+    @Get('`${this.apiUrlPrefix}/info`')
     info(): Promise<RokuDeviceInfo> {
         return this.client.info();
     }
 
+    @Get('`${this.apiUrlPrefix}/apps`')
     apps(): Promise<RokuApp[]> {
         return this.client.apps();
     }
